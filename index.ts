@@ -3,7 +3,10 @@ import TelegramBot from 'node-telegram-bot-api';
 import internal from 'stream';
 const mysql = require("mysql2");
 var config = require('./config.json');
-const token = config.token;
+var strings = require('./strings.json');
+const token = config.telegram.token;
+
+let inject = (str: string, obj: any) => str.replace(/\${(.*?)}/g, (x,g)=> obj[g]);
 
 var keyboard = { 
         reply_markup: {
@@ -35,8 +38,8 @@ bot.on('text' ,async (msg, match) => {
         connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?",[chatId], async function (error: any, results: Array<any>, fields: any) {
             let currentTime = moment();
             if(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 180){
-                await bot.sendSticker(msg.chat.id, 'CAACAgIAAxkBAAEC25FhNKmixHt1Co8ekvpHCvl9Hfkm5AACYAAD29t-AAGGKUzOUOHn4SAE',{reply_markup: keyboard.reply_markup});
-                bot.sendMessage(chatId, `🔒Код авторизации: <b>${results[0].code}</b>\n⏳Срок действия еще не истек`,{parse_mode: 'HTML'},);
+                await bot.sendSticker(msg.chat.id, strings.stickers['🌴'],{reply_markup: keyboard.reply_markup});
+                bot.sendMessage(chatId, inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML'},);
             } else {
                 connection.query("SELECT code FROM telegram_auth", async function (error: any, results: Array<any>, fields: any) {
                     results = results.map((e: { code: string; }) => e.code);
@@ -49,14 +52,14 @@ bot.on('text' ,async (msg, match) => {
                         }
                     } 
                 dataBase(chatId, msg.chat.username, confirmCode);
-                await bot.sendSticker(msg.chat.id, 'CAACAgIAAxkBAAEC2fthM4zNG2JoR9MQ6eQ4aHo9f6yFwwACbwAD29t-AAGZW1Coe5OAdCAE',{reply_markup: keyboard.reply_markup});
-                bot.sendMessage(chatId, `🔒Код авторизации: <b>${confirmCode}</b>\n🚨Активен в течение 3 минут`,{parse_mode: 'HTML'},);
+                await bot.sendSticker(msg.chat.id, strings.stickers['👋'],{reply_markup: keyboard.reply_markup});
+                bot.sendMessage(chatId, inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML'},);
                 });
             }
         });
     } else {
-        await bot.sendSticker(msg.chat.id, 'CAACAgIAAxkBAAEC29phNM9cCe67OWpp3uupByNK5Xd6BwACYwAD29t-AAGMnQU950KD5yAE');
-        bot.sendMessage(chatId, `Простите, я не знаю как вам ответить`,{parse_mode: 'HTML'},{reply_markup: keyboard.reply_markup}, );
+        await bot.sendSticker(msg.chat.id, strings.stickers['🤯']);
+        bot.sendMessage(chatId, strings.langs.ru.error, {parse_mode: 'HTML'},{reply_markup: keyboard.reply_markup}, );
 
     }
     
