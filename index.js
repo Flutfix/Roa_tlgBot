@@ -39,6 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var moment_1 = __importDefault(require("moment"));
 var node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
 var mysql = require("mysql2");
 var config = require('./config.json');
@@ -46,7 +47,7 @@ var token = config.token;
 var keyboard = {
     reply_markup: {
         keyboard: [
-            [{ text: "🌀Обновить код🌀" }], [], [], []
+            [{ text: "🌀Получить код🌀" }], [], [], []
         ],
         resize_keyboard: true,
     }
@@ -67,31 +68,47 @@ bot.on('text', function (msg, match) { return __awaiter(void 0, void 0, void 0, 
         switch (_a.label) {
             case 0:
                 chatId = msg.chat.id;
-                if (!(msg.text == '/start' || msg.text == '🌀Обновить код🌀')) return [3 /*break*/, 1];
-                connection.query("SELECT code FROM telegram_auth", function (error, results, fields) {
+                if (!(msg.text == '/start' || msg.text == '🌀Получить код🌀')) return [3 /*break*/, 1];
+                connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?", [chatId], function (error, results, fields) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var confirmCode, i;
+                        var currentTime;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    results = results.map(function (e) { return e.code; });
-                                    console.log(results);
-                                    confirmCode = '';
-                                    for (i = 0; i <= 10000; i++) {
-                                        // console.log(i);
-                                        confirmCode = "1111";
-                                        // confirmCode =  String(getRandom());
-                                        if (!results.includes(confirmCode)) {
-                                            console.log('break');
-                                            break;
-                                        }
-                                    }
-                                    dataBase(chatId, msg.chat.username, confirmCode);
-                                    return [4 /*yield*/, bot.sendSticker(msg.chat.id, 'CAACAgIAAxkBAAEC2fthM4zNG2JoR9MQ6eQ4aHo9f6yFwwACbwAD29t-AAGZW1Coe5OAdCAE', { reply_markup: keyboard.reply_markup })];
+                                    currentTime = (0, moment_1.default)();
+                                    if (!(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 180)) return [3 /*break*/, 2];
+                                    return [4 /*yield*/, bot.sendSticker(msg.chat.id, 'CAACAgIAAxkBAAEC25FhNKmixHt1Co8ekvpHCvl9Hfkm5AACYAAD29t-AAGGKUzOUOHn4SAE', { reply_markup: keyboard.reply_markup })];
                                 case 1:
                                     _a.sent();
-                                    bot.sendMessage(chatId, "\uD83D\uDD12\u041A\u043E\u0434 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438: <b>" + confirmCode + "</b>\n\uD83D\uDEA8\u0410\u043A\u0442\u0438\u0432\u0435\u043D \u0432 \u0442\u0435\u0447\u0435\u043D\u0438\u0435 3 \u043C\u0438\u043D\u0443\u0442", { parse_mode: 'HTML' });
-                                    return [2 /*return*/];
+                                    bot.sendMessage(chatId, "\uD83D\uDD12\u041A\u043E\u0434 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438: <b>" + results[0].code + "</b>\n\u23F3\u0421\u0440\u043E\u043A \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0435\u0449\u0435 \u043D\u0435 \u0438\u0441\u0442\u0435\u043A", { parse_mode: 'HTML' });
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    connection.query("SELECT code FROM telegram_auth", function (error, results, fields) {
+                                        return __awaiter(this, void 0, void 0, function () {
+                                            var confirmCode, i;
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0:
+                                                        results = results.map(function (e) { return e.code; });
+                                                        confirmCode = '';
+                                                        for (i = 0; i <= 10000; i++) {
+                                                            confirmCode = String(getRandom());
+                                                            if (!results.includes(confirmCode)) {
+                                                                break;
+                                                            }
+                                                        }
+                                                        dataBase(chatId, msg.chat.username, confirmCode);
+                                                        return [4 /*yield*/, bot.sendSticker(msg.chat.id, 'CAACAgIAAxkBAAEC2fthM4zNG2JoR9MQ6eQ4aHo9f6yFwwACbwAD29t-AAGZW1Coe5OAdCAE', { reply_markup: keyboard.reply_markup })];
+                                                    case 1:
+                                                        _a.sent();
+                                                        bot.sendMessage(chatId, "\uD83D\uDD12\u041A\u043E\u0434 \u0430\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u0438: <b>" + confirmCode + "</b>\n\uD83D\uDEA8\u0410\u043A\u0442\u0438\u0432\u0435\u043D \u0432 \u0442\u0435\u0447\u0435\u043D\u0438\u0435 3 \u043C\u0438\u043D\u0443\u0442", { parse_mode: 'HTML' });
+                                                        return [2 /*return*/];
+                                                }
+                                            });
+                                        });
+                                    });
+                                    _a.label = 3;
+                                case 3: return [2 /*return*/];
                             }
                         });
                     });
@@ -113,7 +130,7 @@ function getRandom() {
 ;
 function dataBase(chatId, username, confirmCode) {
     var moment = require('moment');
-    var expiresAt = moment().format('YYYY-MM-DD hh:mm:ss');
+    var expiresAt = moment().add(3, 'minutes').format('YYYY-MM-DD hh:mm:ss');
     console.log(expiresAt);
     connection.query("SELECT * FROM telegram_auth WHERE chat_id=?", [chatId], function (error, results, fields) {
         if (results.length > 0) {
