@@ -37,7 +37,8 @@ bot.on('text' ,async (msg, match) => {
 
         connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?",[chatId], async function (error: any, results: Array<any>, fields: any) {
             let currentTime = moment();
-            if(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 180){
+
+            if(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 0){
                 await bot.sendSticker(msg.chat.id, strings.stickers['🌴'],{reply_markup: keyboard.reply_markup});
                 bot.sendMessage(chatId, inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML'},);
             } else {
@@ -72,11 +73,11 @@ function getRandom():number{
 
 function dataBase(chatId: any, username:any, confirmCode:string ){
     var moment = require('moment');
-    var expiresAt = moment().add(3, 'minutes').format('YYYY-MM-DD hh:mm:ss');
-    console.log(expiresAt);
+    var expiresAt = moment().add(3, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+
     connection.query("SELECT * FROM telegram_auth WHERE chat_id=?", [chatId], function (error: any, results: any, fields: any) {
         if (results.length > 0) {
-            connection.query("UPDATE telegram_auth SET code = ? WHERE chat_id = ?", [confirmCode, chatId]);
+            connection.query("UPDATE telegram_auth SET username = ?, code = ?, expires_at = ? WHERE chat_id = ?", [username, confirmCode, expiresAt, chatId]);
         } else {
             connection.query("INSERT INTO telegram_auth (chat_id, username, code, expires_at) VALUES (?, ?, ?, ?) ",
             [chatId, username, confirmCode, expiresAt]);

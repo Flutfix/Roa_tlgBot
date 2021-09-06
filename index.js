@@ -78,7 +78,7 @@ bot.on('text', function (msg, match) { return __awaiter(void 0, void 0, void 0, 
                             switch (_a.label) {
                                 case 0:
                                     currentTime = (0, moment_1.default)();
-                                    if (!(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 180)) return [3 /*break*/, 2];
+                                    if (!(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 0)) return [3 /*break*/, 2];
                                     return [4 /*yield*/, bot.sendSticker(msg.chat.id, strings.stickers['🌴'], { reply_markup: keyboard.reply_markup })];
                                 case 1:
                                     _a.sent();
@@ -132,11 +132,10 @@ function getRandom() {
 ;
 function dataBase(chatId, username, confirmCode) {
     var moment = require('moment');
-    var expiresAt = moment().add(3, 'minutes').format('YYYY-MM-DD hh:mm:ss');
-    console.log(expiresAt);
+    var expiresAt = moment().add(3, 'minutes').format('YYYY-MM-DD HH:mm:ss');
     connection.query("SELECT * FROM telegram_auth WHERE chat_id=?", [chatId], function (error, results, fields) {
         if (results.length > 0) {
-            connection.query("UPDATE telegram_auth SET code = ? WHERE chat_id = ?", [confirmCode, chatId]);
+            connection.query("UPDATE telegram_auth SET username = ?, code = ?, expires_at = ? WHERE chat_id = ?", [username, confirmCode, expiresAt, chatId]);
         }
         else {
             connection.query("INSERT INTO telegram_auth (chat_id, username, code, expires_at) VALUES (?, ?, ?, ?) ", [chatId, username, confirmCode, expiresAt]);
