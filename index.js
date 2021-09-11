@@ -119,7 +119,7 @@ bot.on('text', function (msg, match) { return __awaiter(void 0, void 0, void 0, 
             case 1: return [4 /*yield*/, bot.sendSticker(msg.chat.id, strings.stickers['🤯'])];
             case 2:
                 _a.sent();
-                bot.sendMessage(chatId, strings.langs.ru.error, { parse_mode: 'HTML' }, { reply_markup: keyboard.reply_markup });
+                bot.sendMessage(chatId, strings.langs.ru.error, { parse_mode: 'HTML', reply_markup: keyboard.reply_markup });
                 _a.label = 3;
             case 3: return [2 /*return*/];
         }

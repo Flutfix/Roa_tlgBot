@@ -60,7 +60,7 @@ bot.on('text' ,async (msg, match) => {
         });
     } else {
         await bot.sendSticker(msg.chat.id, strings.stickers['🤯']);
-        bot.sendMessage(chatId, strings.langs.ru.error, {parse_mode: 'HTML'},{reply_markup: keyboard.reply_markup}, );
+        bot.sendMessage(chatId, strings.langs.ru.error, {parse_mode: 'HTML', reply_markup: keyboard.reply_markup}, );
 
     }
     
