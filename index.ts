@@ -5,10 +5,9 @@ const mysql = require("mysql2");
 var config = require('./config.json');
 var strings = require('./strings.json');
 var logger = require('./logger.js');
+var helpers = require('./helpers.js');
 
 const token = config.telegram.token;
-
-let inject = (str: string, obj: any) => str.replace(/\${(.*?)}/g, (x,g)=> obj[g]);
 
 var keyboard = { 
         reply_markup: {
@@ -34,7 +33,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 
 bot.on('text' ,async (msg, match) => {
-    logger.log("Got text message: %O", msg);
+    logger.info("Got text message: %O", msg);
     const chatId = msg.chat.id;
     if(msg.text == '/start' || msg.text == '/get_code'|| msg.text == '🌀Получить код🌀'){
 
@@ -43,7 +42,7 @@ bot.on('text' ,async (msg, match) => {
 
             if(results !== undefined && results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 0){
                 await bot.sendSticker(msg.chat.id, strings.stickers['🌴']);
-                bot.sendMessage(chatId, inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
+                bot.sendMessage(chatId, helpers.inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
             } else {
                 connection.query("SELECT code FROM telegram_auth", async function (error: any, results: Array<any>, fields: any) {
                     results = results.map((e: { code: string; }) => e.code);
@@ -57,7 +56,7 @@ bot.on('text' ,async (msg, match) => {
                     } 
                 dataBase(chatId, msg.chat.username, confirmCode);
                 await bot.sendSticker(msg.chat.id, strings.stickers['👋'],);
-                bot.sendMessage(chatId, inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
+                bot.sendMessage(chatId, helpers.inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
                 });
             }
         });
