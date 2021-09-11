@@ -4,6 +4,8 @@ import internal from 'stream';
 const mysql = require("mysql2");
 var config = require('./config.json');
 var strings = require('./strings.json');
+var logger = require('./logger.js');
+
 const token = config.telegram.token;
 
 let inject = (str: string, obj: any) => str.replace(/\${(.*?)}/g, (x,g)=> obj[g]);
@@ -32,6 +34,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 
 bot.on('text' ,async (msg, match) => {
+    logger.log("Got text message: %O", msg);
     const chatId = msg.chat.id;
     if(msg.text == '/start' || msg.text == '/get_code'|| msg.text == '🌀Получить код🌀'){
 
