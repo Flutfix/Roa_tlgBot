@@ -33,14 +33,14 @@ const bot = new TelegramBot(token, { polling: true });
 
 bot.on('text' ,async (msg, match) => {
     const chatId = msg.chat.id;
-    if(msg.text == '/start' || msg.text == '🌀Получить код🌀'){
+    if(msg.text == '/start' || msg.text == '/get_code'|| msg.text == '🌀Получить код🌀'){
 
         connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?",[chatId], async function (error: any, results: Array<any>, fields: any) {
             let currentTime = moment();
 
             if(results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 0){
-                await bot.sendSticker(msg.chat.id, strings.stickers['🌴'],{reply_markup: keyboard.reply_markup});
-                bot.sendMessage(chatId, inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML'},);
+                await bot.sendSticker(msg.chat.id, strings.stickers['🌴']);
+                bot.sendMessage(chatId, inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
             } else {
                 connection.query("SELECT code FROM telegram_auth", async function (error: any, results: Array<any>, fields: any) {
                     results = results.map((e: { code: string; }) => e.code);
@@ -53,8 +53,8 @@ bot.on('text' ,async (msg, match) => {
                         }
                     } 
                 dataBase(chatId, msg.chat.username, confirmCode);
-                await bot.sendSticker(msg.chat.id, strings.stickers['👋'],{reply_markup: keyboard.reply_markup});
-                bot.sendMessage(chatId, inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML'},);
+                await bot.sendSticker(msg.chat.id, strings.stickers['👋'],);
+                bot.sendMessage(chatId, inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
                 });
             }
         });
