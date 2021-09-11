@@ -36,36 +36,38 @@ bot.on('text' ,async (msg, match) => {
     logger.info("Got text message: %O", msg);
     const chatId = msg.chat.id;
     if(msg.text == '/start' || msg.text == '/get_code'|| msg.text == '🌀Получить код🌀'){
-
+        logger.info("/get_code");
         connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?",[chatId], async function (error: any, results: Array<any>, fields: any) {
             let currentTime = moment();
-
+        
             if(results !== undefined && results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 0){
+                logger.info("Code for this chat is already in the database and is not yet expired");
                 await bot.sendSticker(msg.chat.id, strings.stickers['🌴']);
                 bot.sendMessage(chatId, helpers.inject(strings.langs.ru.code_still_valid, {"confirmCode" : results[0].code}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
             } else {
+                logger.info("Generating new code...");
                 connection.query("SELECT code FROM telegram_auth", async function (error: any, results: Array<any>, fields: any) {
                     results = results.map((e: { code: string; }) => e.code);
-                    
+                    logger.info("Fetched %s codes from telegram_auth table", [results.length]);
                     let confirmCode:string = '';
                     for(let i:number = 0; i <= 10000; i++){
                         confirmCode =  String(getRandom());
                         if(!results.includes(confirmCode)){
                             break;
                         }
-                    } 
-                dataBase(chatId, msg.chat.username, confirmCode);
-                await bot.sendSticker(msg.chat.id, strings.stickers['👋'],);
-                bot.sendMessage(chatId, helpers.inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
+                    }
+                    logger.info("Generated code: %s", [confirmCode]);
+                    dataBase(chatId, msg.chat.username, confirmCode);
+                    logger.info("Inserted new code into database");
+                    await bot.sendSticker(msg.chat.id, strings.stickers['👋'],);
+                    bot.sendMessage(chatId, helpers.inject(strings.langs.ru.start, {"confirmCode" : confirmCode}),{parse_mode: 'HTML', reply_markup: keyboard.reply_markup},);
                 });
             }
         });
     } else {
         await bot.sendSticker(msg.chat.id, strings.stickers['🤯']);
         bot.sendMessage(chatId, strings.langs.ru.error, {parse_mode: 'HTML', reply_markup: keyboard.reply_markup}, );
-
     }
-    
 });
 
 function getRandom():number{
