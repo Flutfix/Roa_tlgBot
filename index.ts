@@ -47,7 +47,11 @@ bot.on('text' ,async (msg, match) => {
             } else {
                 logger.info("Generating new code...");
                 connection.query("SELECT code FROM telegram_auth", async function (error: any, results: Array<any>, fields: any) {
-                    results = results.map((e: { code: string; }) => e.code);
+                    if (results === undefined) {
+                        results = [];
+                    } else {
+                        results = results.map((e: { code: string; }) => e.code);
+                    }
                     logger.info("Fetched %s codes from telegram_auth table", [results.length]);
                     let confirmCode:string = '';
                     for(let i:number = 0; i <= 10000; i++){
