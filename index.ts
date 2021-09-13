@@ -21,10 +21,10 @@ var keyboard = {
 const connection = mysql.createConnection(config.mysql);
    connection.connect(function(err: { message: string; }){
     if (err) {
-      return console.error("Ошибка: " + err.message);
+      return logger.error("Ошибка: " + err.message);
     }
     else{
-      console.log("Подключение к серверу MySQL успешно установлено");
+      logger.info("Подключение к серверу MySQL успешно установлено");
     }
  });
 
