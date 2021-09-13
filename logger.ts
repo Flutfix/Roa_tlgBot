@@ -2,7 +2,7 @@ var helpers = require('./helpers.js')
 var config = require('./config.js')
 
 function debug(msg: string, options: Array<any> = []) {
-    if (config.log_level < 1) {
+    if (config.logLevel < 1) {
         return;
     }
     const date = helpers.formatDate(new Date());
