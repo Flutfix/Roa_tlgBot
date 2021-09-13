@@ -1,5 +1,5 @@
 var helpers = require('./helpers.js')
-var config = require('./config.js')
+var config = require('./config.json')
 
 function debug(msg: string, options: Array<any> = []) {
     if (config.logLevel < 1) {
