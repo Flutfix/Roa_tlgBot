@@ -19,26 +19,26 @@ var keyboard = {
 };
 
 const connection = mysql.createConnection(config.mysql);
-   connection.connect(function(err: { message: string; }){
+connection.connect(function(err: { message: string; }) {
     if (err) {
-      return logger.error("Ошибка: " + err.message);
+        return logger.error("Ошибка: " + err.message);
     }
-    else{
-      logger.info("Подключение к серверу MySQL успешно установлено");
+    else {
+        logger.info("Подключение к серверу MySQL успешно установлено");
     }
- });
+});
 
   
 const bot = new TelegramBot(token, { polling: true });
 
 
-bot.on('text' ,async (msg, match) => {
+bot.on('text', async (msg, match) => {
     try{
         logger.info("Got text message: %O", msg);
         const chatId = msg.chat.id;
         if(msg.text == '/start' || msg.text == '/get_code'|| msg.text == '🌀Получить код🌀'){
             logger.info("/get_code");
-            connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?",[chatId], async function (error: any, results: Array<any>, fields: any) {
+            connection.query("SELECT expires_at, code FROM telegram_auth WHERE chat_id=?", [chatId], async function (error: any, results: Array<any>, fields: any) {
                 let currentTime = moment();
             
                 if(results !== undefined && results.length > 0 && currentTime.diff(results[0].expires_at, 'seconds') < 0){
@@ -73,25 +73,24 @@ bot.on('text' ,async (msg, match) => {
             await bot.sendSticker(msg.chat.id, strings.stickers['🤯']);
             bot.sendMessage(chatId, strings.langs.ru.error, {parse_mode: 'HTML', reply_markup: keyboard.reply_markup}, );
         }
-    }catch(e){
-        connection.connect(function(err: { message: string; }){
+    } catch(e) {
+        connection.connect(function(err: { message: string; }) {
             if (err) {
               return logger.error("Ошибка: " + err.message);
             }
-            else{
+            else {
               logger.info("Подключение к серверу MySQL успешно установлено");
             }
          });
     }
-    
 });
 
-function getRandom():number{
+function getRandom(): number {
     let result:number = Math.floor((Math.random() * 8999) + 1001);
     return result;  
 };
 
-function dataBase(chatId: any, username:any, confirmCode:string ){
+function dataBase(chatId: any, username: any, confirmCode: string) {
     var moment = require('moment');
     var expiresAt = moment().add(3, 'minutes').format('YYYY-MM-DD HH:mm:ss');
 

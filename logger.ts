@@ -38,7 +38,7 @@ function fatal(msg: string, options: Array<any> = []) {
         return;
     }
     const date = helpers.formatDate(new Date());
-    console.log(helpers.inject("[${0}] FATAL: ${1}", [date, msg]), options);
+    console.error(helpers.inject("[${0}] FATAL: ${1}", [date, msg]), options);
 }
 
 module.exports = {
